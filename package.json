@@ -7,6 +7,7 @@
     "googleapis": "^59.0.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "yarn clean && node index.js",
+    "clean": "rm -rf dist"
   }
 }
