@@ -2,10 +2,14 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const http = require('https');
 
-const IMAGE_PREFIX = 'ergodash';
+const IMAGE_FILENAME_PREFIX = 'ergodash';
+const IMAGE_PATH = '/images/2020/08/';
+const DOCUMENT_ID = '1YqzP6fyfq0GZUGSFqkszup8LXtPdVHjVoadUFKy-LW4';
+const SERVICE_ACCOUNT_KEY_FILE = './docs2md-481f15365566.json';
+const MARKDOWN_FILENAME = 'post.md';
 
 const JWT = google.auth.JWT;
-const keys = require('./docs2md-481f15365566.json');
+const keys = require(SERVICE_ACCOUNT_KEY_FILE);
 const jwtClient = new JWT(
   keys.client_email,
   null,
@@ -22,7 +26,7 @@ jwtClient.authorize((err, tokens) => {
     auth: jwtClient
   });
   docs.documents.get({
-    documentId: '1YqzP6fyfq0GZUGSFqkszup8LXtPdVHjVoadUFKy-LW4'
+    documentId: DOCUMENT_ID
   }, (err1, res) => {
     if (err1) {
       console.error(err1);
@@ -46,13 +50,13 @@ jwtClient.authorize((err, tokens) => {
                 fs.mkdirSync('./dist/images');
               } catch(_e) {
               }
-              const filename = `${IMAGE_PREFIX}-${imageIndex++}.png`;
+              const filename = `${IMAGE_FILENAME_PREFIX}-${imageIndex++}.png`;
               const file = fs.createWriteStream(`./dist/images/${filename}`);
               http.get(
                 inlineObject.inlineObjectProperties.embeddedObject.imageProperties.contentUri, response => {
                   response.pipe(file);
                 });
-              lines.push(`\n![]({{ "/images/2020/08/${filename}" | prepend: site.baseurl }})\n`);
+              lines.push(`\n![]({{ "${IMAGE_PATH}${filename}" | prepend: site.baseurl }})\n`);
             }
           });
         } else if (items.paragraph.paragraphStyle.namedStyleType === 'HEADING_1') {
@@ -68,7 +72,7 @@ jwtClient.authorize((err, tokens) => {
       }
     });
     try {
-      fs.writeFileSync('./dist/post.md', lines.join(''));
+      fs.writeFileSync(`./dist/${MARKDOWN_FILENAME}`, lines.join(''));
     } catch(e) {
       console.error(e);
     }
