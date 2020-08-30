@@ -2,11 +2,11 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const http = require('https');
 
-const IMAGE_FILENAME_PREFIX = 'ergodash';
+const IMAGE_FILENAME_PREFIX = 'ergodash-2';
 const IMAGE_PATH = '/images/2020/08/';
-const DOCUMENT_ID = '1YqzP6fyfq0GZUGSFqkszup8LXtPdVHjVoadUFKy-LW4';
+const DOCUMENT_ID = '1p_tAncO8eux4lAvkqBrQ4fZ-LZF_6abAwrnogjCU1Gc';
 const SERVICE_ACCOUNT_KEY_FILE = './docs2md-481f15365566.json';
-const MARKDOWN_FILENAME = 'post.md';
+const MARKDOWN_FILENAME = '2020-08-31-ergodash_2.md';
 
 const JWT = google.auth.JWT;
 const keys = require(SERVICE_ACCOUNT_KEY_FILE);
@@ -50,7 +50,7 @@ jwtClient.authorize((err, tokens) => {
                 fs.mkdirSync('./dist/images');
               } catch(_e) {
               }
-              const filename = `${IMAGE_FILENAME_PREFIX}-${imageIndex++}.png`;
+              const filename = `${IMAGE_FILENAME_PREFIX}-${imageIndex++}.jpg`;
               const file = fs.createWriteStream(`./dist/images/${filename}`);
               http.get(
                 inlineObject.inlineObjectProperties.embeddedObject.imageProperties.contentUri, response => {
