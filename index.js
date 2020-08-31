@@ -2,11 +2,11 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const http = require('https');
 
-const IMAGE_FILENAME_PREFIX = 'ergodash-2';
+const IMAGE_FILENAME_PREFIX = 'ergodash-3';
 const IMAGE_PATH = '/images/2020/08/';
-const DOCUMENT_ID = '1p_tAncO8eux4lAvkqBrQ4fZ-LZF_6abAwrnogjCU1Gc';
+const DOCUMENT_ID = '1K0jFT75tLsZrC5nkxuPzP1Uqj3DsnSR8wAhEsPdcVEQ';
 const SERVICE_ACCOUNT_KEY_FILE = './docs2md-481f15365566.json';
-const MARKDOWN_FILENAME = '2020-08-31-ergodash_2.md';
+const MARKDOWN_FILENAME = '2020-08-31-ergodash_3.md';
 
 const JWT = google.auth.JWT;
 const keys = require(SERVICE_ACCOUNT_KEY_FILE);
@@ -69,6 +69,15 @@ jwtClient.authorize((err, tokens) => {
           }).filter(x => x !== null);
           lines.push(`# ${heads.join('')}\n`);
         }
+      } else if (items.table) {
+        const code = [];
+        items.table.tableRows[0].tableCells[0].content
+          .forEach(c => {
+            c.paragraph.elements.forEach(e => {
+              code.push(e.textRun.content);
+            });
+          });
+        lines.push('```\n' + code.join('') + '```\n\n');
       }
     });
     try {
