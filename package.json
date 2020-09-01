@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "googleapis": "^59.0.0"
+    "googleapis": "^59.0.0",
+    "sharp": "^0.26.0"
   },
   "scripts": {
     "start": "yarn clean && node index.js",
