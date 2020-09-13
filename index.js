@@ -3,6 +3,7 @@ const fs = require('fs');
 const http = require('https');
 const sharp = require('sharp');
 const prompts = require('prompts');
+const moment = require('moment');
 
 const SERVICE_ACCOUNT_KEY_FILE = './docs2md-481f15365566.json';
 
@@ -78,7 +79,6 @@ const resizeImage = (tempFilename, filepath) => {
         }
       } else {
         fs.renameSync(filepath, `${filepath}.${format}`);
-        fs.unlinkSync(filepath);
         resolve(filename);
       }
     }).catch(reason => {
@@ -118,8 +118,9 @@ const main = async () => {
   if (!documentId) {
     return;
   }
-  const currentYearMonth =
-  const imagePath = await getDataFromPrompt('imagePath', 'Image path', ``);
+  const now = moment();
+  const current = now.format('YYYY/MM');
+  const imagePath = await getDataFromPrompt('imagePath', 'Image path', `/images/${current}/`);
   if (!imagePath) {
     return;
   }
