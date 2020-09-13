@@ -2,12 +2,9 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const http = require('https');
 const sharp = require('sharp');
+const prompts = require('prompts');
 
-const IMAGE_FILENAME_PREFIX = 'ergodash-7';
-const IMAGE_PATH = '/images/2020/09/';
-const DOCUMENT_ID = '1ARsJGjGfaVThd3raCVLm8RC_tvS0DYs-LMJrTcMWras';
 const SERVICE_ACCOUNT_KEY_FILE = './docs2md-481f15365566.json';
-const MARKDOWN_FILENAME = '2020-09-03-ergodash_7.md';
 
 const authorize = () => {
   return new Promise((resolve, reject) => {
@@ -25,14 +22,14 @@ const authorize = () => {
   });
 };
 
-const getDocument = jwtClient => {
+const getDocument = (jwtClient, documentId) => {
   return new Promise((resolve, reject) => {
     const docs = google.docs({
       version: 'v1',
       auth: jwtClient
     });
     docs.documents.get({
-      documentId: DOCUMENT_ID
+      documentId: documentId
     }, (err, res) => {
       err ? reject(err) : resolve(res);
     });
@@ -90,22 +87,53 @@ const resizeImage = (tempFilename, filepath) => {
   });
 };
 
-const inlineImage = async (document, element, imageIndex) => {
+const inlineImage = async (document, element, imageIndex, imageFilenamePrefix, imagePath) => {
   const inlineObject = document.data.inlineObjects[element.inlineObjectElement.inlineObjectId];
   try {
     fs.mkdirSync('./dist/images');
   } catch(_e) {
   }
-  const tempFilename = `${IMAGE_FILENAME_PREFIX}-${imageIndex}`;
+  const tempFilename = `${imageFilenamePrefix}-${imageIndex}`;
   const filepath = `./dist/images/${tempFilename}`;
   await fetchImage(inlineObject, tempFilename, filepath);
   const filename = await resizeImage(tempFilename, filepath);
-  return `\n![]({{ "${IMAGE_PATH}${filename}" | prepend: site.baseurl }})\n`;
+  return `\n![]({{ "${imagePath}${filename}" | prepend: site.baseurl }})\n`;
+}
+
+const getDataFromPrompt = async (name, desc, initial) => {
+  const option = {
+    type: 'text',
+    name,
+    message: desc
+  };
+  if (initial) {
+    option.initial = initial;
+  }
+  const response = await prompts(option);
+  return response[name];
 }
 
 const main = async () => {
+  const documentId = await getDataFromPrompt('documentId', 'Document ID');
+  if (!documentId) {
+    return;
+  }
+  const currentYearMonth =
+  const imagePath = await getDataFromPrompt('imagePath', 'Image path', ``);
+  if (!imagePath) {
+    return;
+  }
+  const imageFilenamePrefix = await getDataFromPrompt('imageFilenamePrefix', 'Image Filename Prefix');
+  if (!imageFilenamePrefix) {
+    return;
+  }
+  const markdownFilename = await getDataFromPrompt('markdownFilename', 'Markdown filename');
+  if (!markdownFilename) {
+    return;
+  }
+
   const jwtClient = await authorize();
-  const document = await getDocument(jwtClient);
+  const document = await getDocument(jwtClient, documentId);
   try {
     fs.mkdirSync('./dist');
   } catch(_e) {
@@ -119,7 +147,7 @@ const main = async () => {
           if (element.textRun) {
             lines.push(element.textRun.content);
           } else if (element.inlineObjectElement) {
-            lines.push(await inlineImage(document, element, imageIndex++));
+            lines.push(await inlineImage(document, element, imageIndex++, imageFilenamePrefix, imagePath));
           }
         }
       } else if (items.paragraph.paragraphStyle.namedStyleType === 'HEADING_1') {
@@ -143,7 +171,7 @@ const main = async () => {
       lines.push('\n```\n' + code.join('') + '```\n');
     }
   }
-  fs.writeFileSync(`./dist/${MARKDOWN_FILENAME}`, lines.join(''));
+  fs.writeFileSync(`./dist/${markdownFilename}`, lines.join(''));
 }
 
 main()
