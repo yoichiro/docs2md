@@ -1,3 +1,4 @@
 docs2md-*.json
 node_modules
 dist
+.docs2md
