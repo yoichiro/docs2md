@@ -113,25 +113,45 @@ const getDataFromPrompt = async (name, desc, initial) => {
   return response[name];
 }
 
+const loadPreviousData = async () => {
+  if (fs.existsSync('./.docs2md')) {
+    const json = fs.readFileSync('./.docs2md');
+    return JSON.parse(json);
+  } else {
+    return {};
+  }
+};
+
+const savePreviousData = async data => {
+  fs.writeFileSync('./.docs2md', JSON.stringify(data));
+};
+
 const main = async () => {
-  const documentId = await getDataFromPrompt('documentId', 'Document ID');
+  const previousData = await loadPreviousData();
+  const documentId = await getDataFromPrompt('documentId', 'Document ID', previousData.documentId);
   if (!documentId) {
     return;
   }
+  previousData.documentId = documentId;
+  savePreviousData(previousData);
   const now = moment();
   const current = now.format('YYYY/MM');
   const imagePath = await getDataFromPrompt('imagePath', 'Image path', `/images/${current}/`);
   if (!imagePath) {
     return;
   }
-  const imageFilenamePrefix = await getDataFromPrompt('imageFilenamePrefix', 'Image Filename Prefix');
+  const imageFilenamePrefix = await getDataFromPrompt('imageFilenamePrefix', 'Image Filename Prefix', previousData.imageFilenamePrefix);
   if (!imageFilenamePrefix) {
     return;
   }
-  const markdownFilename = await getDataFromPrompt('markdownFilename', 'Markdown filename');
+  previousData.imageFilenamePrefix = imageFilenamePrefix;
+  savePreviousData(previousData);
+  const markdownFilename = await getDataFromPrompt('markdownFilename', 'Markdown filename', previousData.markdownFilename);
   if (!markdownFilename) {
     return;
   }
+  previousData.markdownFilename = markdownFilename;
+  savePreviousData(previousData);
 
   const jwtClient = await authorize();
   const document = await getDocument(jwtClient, documentId);
