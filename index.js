@@ -180,6 +180,15 @@ const main = async () => {
           }
         }).filter(x => x !== null);
         lines.push(`# ${heads.join('')}\n`);
+      } else if (items.paragraph.paragraphStyle.namedStyleType === 'HEADING_2') {
+        const heads = items.paragraph.elements.map(element => {
+          if (element.textRun) {
+            return element.textRun.content;
+          } else {
+            return null;
+          }
+        }).filter(x => x !== null);
+        lines.push(`## ${heads.join('')}\n`);
       }
     } else if (items.table) {
       const code = [];
