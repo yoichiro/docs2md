@@ -59,7 +59,6 @@ const resizeImage = (tempFilename, filepath) => {
     image.metadata().then(metadata => {
       const width = metadata.width;
       const height = metadata.height;
-      // const format = metadata.format;
       const filename = `${tempFilename}.webp`;
       if (width > 800 || height > 800) {
         if (width > height) {
