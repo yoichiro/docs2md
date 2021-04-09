@@ -59,27 +59,38 @@ const resizeImage = (tempFilename, filepath) => {
     image.metadata().then(metadata => {
       const width = metadata.width;
       const height = metadata.height;
-      const format = metadata.format;
-      const filename = `${tempFilename}.${format}`;
+      const filename = `${tempFilename}.webp`;
       if (width > 800 || height > 800) {
         if (width > height) {
           image
             .resize(800)
-            .toFile(`${filepath}.${format}`, (err, info) => {
+            .webp({
+              quality: 75
+            })
+            .toFile(`${filepath}.webp`, (err, info) => {
               fs.unlinkSync(filepath);
               err ? reject(err) : resolve(filename);
             });
         } else {
           image
             .resize(null, 800)
-            .toFile(`${filepath}.${format}`, (err, info) => {
+            .webp({
+              quality: 75
+            })
+            .toFile(`${filepath}.webp`, (err, info) => {
               fs.unlinkSync(filepath);
               err ? reject(err) : resolve(filename);
             });
         }
       } else {
-        fs.renameSync(filepath, `${filepath}.${format}`);
-        resolve(filename);
+        image
+          .webp({
+            quality: 75
+          })
+          .toFile(`${filepath}.webp`, (err, info) => {
+            fs.unlinkSync(filepath);
+            err ? reject(err) : resolve(filename);
+          });
       }
     }).catch(reason => {
       reject(reason);
