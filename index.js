@@ -4,6 +4,7 @@ const http = require('https');
 const sharp = require('sharp');
 const prompts = require('prompts');
 const moment = require('moment');
+const chalk = require('chalk');
 
 const SERVICE_ACCOUNT_KEY_FILE = './docs2md-481f15365566.json';
 
@@ -170,15 +171,25 @@ const main = async () => {
     fs.mkdirSync('./dist');
   } catch(_e) {
   }
-  const lines = [];
+  const lines = [
+    '---\n',
+    'layout: post\n',
+    `title: ${document.data.title}\n`,
+    'categories:\n',
+    '- \n',
+    '---\n',
+    '\n'
+  ];
   let imageIndex = 1;
   for (let items of document.data.body.content) {
     if (items.paragraph) {
       if (items.paragraph.paragraphStyle.namedStyleType === 'NORMAL_TEXT') {
         for (let element of items.paragraph.elements) {
           if (element.textRun) {
+            process.stdout.write(chalk.white('.'));
             lines.push(element.textRun.content);
           } else if (element.inlineObjectElement) {
+            process.stdout.write(chalk.red('.'));
             lines.push(await inlineImage(document, element, imageIndex++, imageFilenamePrefix, imagePath));
           }
         }
@@ -190,6 +201,7 @@ const main = async () => {
             return null;
           }
         }).filter(x => x !== null);
+        process.stdout.write(chalk.yellow('.'));
         lines.push(`# ${heads.join('')}\n`);
       } else if (items.paragraph.paragraphStyle.namedStyleType === 'HEADING_2') {
         const heads = items.paragraph.elements.map(element => {
@@ -199,6 +211,7 @@ const main = async () => {
             return null;
           }
         }).filter(x => x !== null);
+        process.stdout.write(chalk.blue('.'));
         lines.push(`## ${heads.join('')}\n`);
       }
     } else if (items.table) {
@@ -209,6 +222,7 @@ const main = async () => {
             code.push(e.textRun.content);
           });
         });
+      process.stdout.write(chalk.gray('.'));
       lines.push('\n```\n' + code.join('') + '```\n');
     }
   }
@@ -217,7 +231,7 @@ const main = async () => {
 
 main()
   .then(() => {
-    console.log('Finish.');
+    console.log('');
   })
   .catch(reason => {
     console.log(reason);
