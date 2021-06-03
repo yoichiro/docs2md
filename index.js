@@ -121,7 +121,7 @@ const inlineImage = async (
   const filepath = `./dist/images/${tempFilename}`;
   await fetchImage(inlineObject, tempFilename, filepath);
   const filename = await resizeImage(tempFilename, filepath);
-  return `\n![]({{ "${imagePath}${filename}" | prepend: site.baseurl }})\n`;
+  return `\n![]({{ "${imagePath}${filename}" | prepend: site.baseurl }}){:loading="lazy"}\n`;
 };
 
 const getDataFromPrompt = async (name, desc, initial) => {
