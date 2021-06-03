@@ -14,8 +14,5 @@
   "scripts": {
     "start": "yarn clean && node index.js",
     "clean": "rm -rf dist"
-  },
-  "devDependencies": {
-    "prettier": "^2.3.0"
   }
 }
